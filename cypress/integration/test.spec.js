@@ -24,22 +24,29 @@ describe("Workshop tests",() =>{
 
   it('should reproduce the whole logged user path', ()=>{
     const articleTitle='Custom Cypress title'
+    let version = 7;
     cy.get('.container > .nav > :nth-child(2) > .nav-link')
       .click()
     cy.url().should('equal','http://localhost:4200/login')
     cy.get('button').should('have.text', ' Sign in ')
     cy.get(':nth-child(2) > .form-control').type('ngconfentcypress@testemail.com')
     cy.get(':nth-child(3) > .form-control').type('ngConfEntCypress')
+    cy.server();
+    cy.route('POST','https://conduit.productionready.io/api/users/login').as('login')
+
     cy.get('button').should('not.be','disabled').click()
+    cy.wait('@login').its('status').should('equal',200)
     cy.url().should('equal','http://localhost:4200/')
     cy.contains('New Article').click()
     cy.url().should('equal','http://localhost:4200/editor')
-    cy.get(':nth-child(1) > .form-control').type(articleTitle)
+    cy.get(':nth-child(1) > .form-control').type(`${articleTitle} ${version}`)
     cy.get(':nth-child(2) > .form-control').type('This is filled by Cypress testing')
     cy.get(':nth-child(3) > .form-control').type('lorem ipsum')
     cy.get(':nth-child(4) > .form-control').type('testing,cypress,e2e')
     cy.get('button').should('not.be','disabled').click()
-    cy.get('h1').should('have.text',`${articleTitle}`)
+    cy.get('h1').should('have.text',`${articleTitle} ${version}`)
+    version=version+1
+
 
   })
 })
